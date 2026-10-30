@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f9fafb">
+<meta name="description" content="App didattica interattiva sulle progressioni aritmetiche e geometriche: termine generale e somma di n termini. Teoria, simulazioni, esercizi e quiz di autovalutazione.">
+<title>Progressioni aritmetiche e geometriche · Matematica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="katex/katex.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script defer src="katex/katex.min.js"></script>
+<script defer src="katex/auto-render.min.js"></script>
+<script>
+/* Tema prima del primo paint (niente flash) */
+(function(){
+  var t=localStorage.getItem('theme');
+  if(t==='dark'||(t===null&&matchMedia('(prefers-color-scheme:dark)').matches)){
+    document.documentElement.setAttribute('data-theme','dark');
+    var m=document.querySelector('meta[name="theme-color"]');
+    if(m)m.setAttribute('content','#111827');
+  }
+}());
+</script>
+<style>
+/* ===================== Design system ===================== */
+:root{
+  --color-primary:#2563eb;      /* Blu scientifico */
+  --color-secondary:#1e40af;
+  --color-accent:#f59e0b;       /* Arancio per highlight */
+  --color-success:#1d70bf;      /* "corretto" in blu, non verde */
+  --color-error:#d97706;        /* "errato" in arancio, non rosso */
+  --color-bg:#f9fafb;
+  --color-text:#1f2937;
+  --surface:#ffffff;
+  --border:#e5e7eb;
+  --muted:#6b7280;
+  --primary-soft:#eff6ff;
+  --accent-soft:#fef3c7;
+  --accent-deep:#b45309;
+  --success-soft:#e7f0fa;
+  --success-deep:#12467e;
+  --error-soft:#fde4c8;
+  --error-deep:#b45309;
+  --radius:12px;
+  --shadow:0 1px 3px rgba(17,24,39,.07);
+  --font-head:"Fraunces",Georgia,"Times New Roman",serif;
+  --font-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--color-bg);color:var(--color-text);
+  font-family:"Inter","Roboto",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,"Helvetica Neue",Arial,sans-serif;
+  font-size:clamp(15px,2.3vw,16.5px);line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+:focus-visible{outline:3px solid rgba(37,99,235,.45);outline-offset:2px}
+
+/* ===================== Header ===================== */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:.85rem 1rem .8rem}
+header .wrap{max-width:1000px;margin:0 auto;display:flex;align-items:baseline;
+  justify-content:space-between;gap:.8rem;flex-wrap:wrap}
+header h1{font-family:var(--font-head);font-size:clamp(1.12rem,3.8vw,1.45rem);font-weight:800;
+  letter-spacing:-.02em;color:var(--color-text)}
+header .sub{color:var(--muted);font-size:.82em;font-weight:500}
+
+/* ===================== Nav ===================== */
+nav.main{background:var(--surface);border-bottom:1px solid var(--border);
+  position:static;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+nav.main .wrap{max-width:1000px;margin:0 auto;display:flex;gap:.4rem;padding:.55rem 1rem}
+nav.main button{flex:0 0 auto;background:var(--color-bg);border:1px solid var(--border);
+  border-radius:999px;padding:.42rem .95rem;font-size:.85em;color:var(--muted);
+  cursor:pointer;white-space:nowrap;font-family:inherit;font-weight:600;min-height:36px;
+  transition:background .15s,border-color .15s,color .15s}
+nav.main button:hover:not(.active){background:var(--primary-soft);border-color:var(--color-primary);color:var(--color-secondary)}
+nav.main button.active{background:var(--color-primary);border-color:var(--color-primary);color:#fff}
+
+/* ===================== Layout ===================== */
+main{padding:1.2rem 1rem 2.6rem;max-width:1000px;margin:0 auto}
+section.scene{display:none}
+section.scene.active{display:block;animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.page-head{margin:.2rem 0 1rem;border-left:4px solid var(--color-primary);padding-left:.75rem}
+.page-head h2{font-family:var(--font-head);font-size:clamp(1.18rem,3.6vw,1.5rem);font-weight:800;letter-spacing:-.015em}
+.page-head .lead{margin-top:.15rem}
+.lead{color:var(--muted);font-size:.92em}
+
+/* ===================== Card ===================== */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:1.15rem 1.25rem;margin-bottom:1.1rem;box-shadow:var(--shadow)}
+.card>h2{font-family:var(--font-head);font-size:1.13em;font-weight:700;letter-spacing:-.01em;margin-bottom:.45rem}
+.card h3{font-family:var(--font-head);color:var(--color-secondary);font-size:.99em;font-weight:700;margin:.9rem 0 .3rem}
+.card p{margin:.45rem 0}
+.card ul,.card ol{margin:.4rem 0 .4rem 1.3rem}
+.card li{margin:.26rem 0}
+.card li::marker{color:var(--color-primary);font-weight:700}
+
+/* ===================== Accordion ===================== */
+.accordion details{border:1px solid var(--border);border-radius:10px;margin-bottom:.55rem;background:var(--surface);overflow:hidden}
+.accordion details[open]{border-color:#c7d6f5}
+.accordion summary{list-style:none;display:flex;align-items:center;justify-content:space-between;
+  gap:.7rem;padding:.72rem 1rem;cursor:pointer;font-weight:650;font-size:.96em;transition:background .15s,color .15s}
+.accordion summary::-webkit-details-marker{display:none}
+.accordion summary:hover{background:var(--primary-soft);color:var(--color-secondary)}
+.accordion summary::after{content:"";flex:0 0 auto;width:9px;height:9px;
+  border-right:2.2px solid var(--muted);border-bottom:2.2px solid var(--muted);
+  transform:rotate(45deg) translate(-1px,-1px);transition:transform .25s}
+.accordion details[open] summary::after{transform:rotate(-135deg) translate(-2px,-2px)}
+.acc-body{padding:.3rem 1rem .95rem;border-top:1px solid var(--border)}
+.acc-body>p:first-child{margin-top:.55rem}
+
+/* ===================== Formule e note ===================== */
+.formula{background:var(--primary-soft);border-left:3px solid var(--color-primary);
+  padding:.6rem .95rem;margin:.6rem 0;border-radius:0 8px 8px 0;line-height:1.9;overflow-x:auto}
+.formula.center{text-align:center}
+.formula .why{display:block;font-size:.76em;color:var(--muted);line-height:1.5;margin-top:.25rem}
+.note-ok{background:var(--success-soft);border-left:3px solid var(--color-success);
+  color:#12467e;padding:.5rem .9rem;margin:.55rem 0;border-radius:0 8px 8px 0;font-size:.9em}
+.note-warn{background:var(--accent-soft);border-left:3px solid var(--color-accent);
+  color:#78350f;padding:.5rem .9rem;margin:.55rem 0;border-radius:0 8px 8px 0;font-size:.9em}
+.sol-box{background:var(--success-soft);border:1px solid #9cc3ec;border-radius:10px;padding:.7rem 1rem;margin:.6rem 0;font-size:1em}
+.sol-box .t{font-size:.72em;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--success-deep);display:block;margin-bottom:.15rem}
+
+/* ===================== Tabelle ===================== */
+.tbl-wrap{overflow-x:auto;margin:.6rem 0}
+table.tbl{border-collapse:collapse;width:100%;font-size:.88em;min-width:360px}
+.tbl th{background:var(--primary-soft);color:var(--color-secondary);text-align:left;
+  padding:.45rem .65rem;border-bottom:2px solid var(--color-primary);font-weight:700}
+.tbl td{padding:.45rem .65rem;border-bottom:1px solid var(--border);vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.tbl .m{font-family:var(--font-mono)}
+
+/* ===================== Bottoni ===================== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;border-radius:8px;
+  padding:.5rem 1.05rem;font-family:inherit;font-size:.88em;font-weight:600;cursor:pointer;
+  border:1px solid transparent;transition:background .15s,border-color .15s,color .15s,box-shadow .15s,transform .1s}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary{background:var(--color-primary);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--color-secondary);box-shadow:0 2px 8px rgba(37,99,235,.3)}
+.btn-ghost{background:var(--surface);border-color:var(--border);color:var(--color-secondary)}
+.btn-ghost:hover:not(:disabled){background:var(--primary-soft);border-color:var(--color-primary)}
+.btn-row{display:flex;flex-wrap:wrap;gap:.45rem;margin:.6rem 0 .1rem}
+
+/* ===================== Campi input ===================== */
+input[type=number],input[type=text]{font-family:inherit;font-size:.95em;padding:.5rem .65rem;
+  border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--color-text);min-height:40px;max-width:9rem}
+input[type=number]:focus,input[type=text]:focus{outline:none;border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(37,99,235,.18)}
+input[type=range]{accent-color:var(--color-primary);min-height:26px}
+.ctrl{display:grid;gap:.5rem;margin:.2rem 0 .7rem}
+.ctrl label{display:flex;align-items:center;gap:.6rem;font-size:.89em}
+.ctrl label .nm{color:var(--muted);min-width:2.4em;font-weight:600}
+.ctrl label input[type=range]{flex:1;min-width:0}
+.ctrl label .v{min-width:3.4em;text-align:right;font-weight:700;color:var(--color-secondary);
+  font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+
+/* ===================== Simulazioni ===================== */
+.sim-layout{display:grid;grid-template-columns:1.08fr 1fr;gap:1.15rem;align-items:start;margin-top:.6rem}
+@media(max-width:740px){.sim-layout{grid-template-columns:1fr}}
+.sim-pane,.ctrl-pane{min-width:0}
+canvas.plot{width:100%;height:auto;display:block;border:1px solid var(--border);border-radius:10px;background:#fff}
+.legend{display:flex;flex-wrap:wrap;gap:.35rem;margin:.5rem 0 0;font-size:.76em}
+.legend span{display:inline-flex;align-items:center;gap:.32rem;background:var(--color-bg);
+  padding:.18rem .55rem;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
+.legend i{display:inline-block;width:13px;height:5px;border-radius:3px}
+.read{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:.45rem;margin:.55rem 0;font-size:.87em}
+.read .it{background:var(--color-bg);padding:.42rem .6rem;border-radius:8px;border:1px solid var(--border)}
+.read .it .l{color:var(--muted);font-size:.76em;display:block;margin-bottom:.1rem;font-weight:600}
+.read .it .v{font-weight:700;font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.seqline{font-family:var(--font-mono);font-size:.9em;background:var(--color-bg);border:1px solid var(--border);
+  border-radius:8px;padding:.5rem .7rem;margin:.5rem 0;overflow-x:auto;white-space:nowrap}
+
+/* ===================== Passi risolutivi ===================== */
+ol.steps{list-style:none;margin:.6rem 0;counter-reset:st;padding:0}
+ol.steps li{counter-increment:st;position:relative;padding:.3rem 0 .3rem 2.15rem;margin:0;border-bottom:1px dashed var(--border)}
+ol.steps li:last-child{border-bottom:none}
+ol.steps li::before{content:counter(st);position:absolute;left:0;top:.42rem;width:1.5rem;height:1.5rem;
+  border-radius:50%;background:var(--primary-soft);color:var(--color-secondary);font-weight:700;font-size:.76em;
+  display:flex;align-items:center;justify-content:center}
+
+/* ===================== Sec-tabs ===================== */
+.sec-tabs{display:flex;gap:.35rem;margin:1.1rem 0 .5rem;flex-wrap:wrap}
+.sec-tab{flex:1;min-width:6rem;padding:.55rem .9rem;border:none;border-radius:8px;font-size:.88em;font-weight:600;
+  cursor:pointer;transition:background .18s,color .18s;background:var(--border);color:var(--muted)}
+.sec-tab.active{background:var(--color-primary);color:#fff}
+.sec-tab:hover:not(.active){background:#d1d5db}
+[data-theme=dark] .sec-tab:hover:not(.active){background:#374151}
+.sec-panel[hidden]{display:none}
+
+/* ===================== Prova tu ===================== */
+.prova-q{font-size:1.02em;line-height:1.7;margin:.3rem 0 .7rem}
+.prova-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;font-size:1.05em}
+.prova-row .lab{font-weight:600}
+.prova-fb{padding:.6rem .9rem;border-radius:8px;font-size:.9em;line-height:1.55;margin-top:.7rem}
+.prova-fb.ok{background:var(--success-soft);border-left:3px solid var(--color-success);color:#12467e}
+.prova-fb.no{background:var(--error-soft);border-left:3px solid var(--color-error);color:#7a4713}
+.prova-hints{margin-top:.6rem;display:grid;gap:.4rem}
+.prova-hints .hint{background:var(--primary-soft);border-left:3px solid var(--color-primary);
+  padding:.45rem .8rem;border-radius:0 8px 8px 0;font-size:.88em}
+
+/* ===================== Tabs (quiz interni) ===================== */
+.tabs{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.85rem}
+.tab{background:var(--color-bg);border:1px solid var(--border);border-radius:999px;padding:.4rem .95rem;
+  font-family:inherit;font-size:.85em;font-weight:600;color:var(--muted);cursor:pointer;
+  transition:background .15s,border-color .15s,color .15s}
+.tab:hover:not(.active){background:var(--primary-soft);border-color:var(--color-primary);color:var(--color-secondary)}
+.tab.active{background:var(--color-primary);border-color:var(--color-primary);color:#fff}
+
+/* ===================== Quiz ===================== */
+.quiz-hd{display:flex;justify-content:space-between;align-items:center;gap:.6rem;margin-bottom:.45rem;font-size:.84em;color:var(--muted);font-weight:600}
+.quiz-hd .score{color:var(--color-secondary)}
+.quiz-bar{background:#e5e7eb;border-radius:999px;height:6px;margin-bottom:.95rem;overflow:hidden}
+.quiz-bar i{display:block;background:var(--color-primary);height:100%;border-radius:999px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+.quiz-q{font-weight:650;margin:.2rem 0 .8rem;line-height:1.55;font-size:.99em}
+.quiz-opts{display:grid;gap:.4rem;margin-bottom:.5rem}
+.quiz-btn{background:var(--color-bg);border:1.5px solid var(--border);border-radius:8px;padding:.52rem .9rem;
+  text-align:left;cursor:pointer;font-size:.9em;font-family:inherit;color:var(--color-text);line-height:1.45;
+  transition:background .12s,border-color .12s}
+.quiz-btn:not(:disabled):hover{background:var(--primary-soft);border-color:var(--color-primary)}
+.quiz-btn:disabled{cursor:default}
+.quiz-btn.correct{background:var(--success-soft)!important;border-color:var(--color-success)!important;color:#12467e;font-weight:650}
+.quiz-btn.wrong{background:var(--error-soft)!important;border-color:var(--color-error)!important;color:var(--error-deep)}
+.quiz-ft{min-height:0}
+.quiz-exp{padding:.55rem .9rem;border-radius:8px;font-size:.87em;line-height:1.55;margin:.5rem 0}
+.quiz-exp.ok{background:var(--success-soft);border-left:3px solid var(--color-success);color:#12467e}
+.quiz-exp.no{background:var(--error-soft);border-left:3px solid var(--color-error);color:#7a4713}
+.quiz-nav{display:flex;gap:.5rem;margin-top:.7rem}
+.quiz-nav .btn-back{background:var(--border);color:var(--color-text);border:none;border-radius:8px;padding:.45rem .9rem;font-size:.88em;cursor:pointer}
+.quiz-nav .btn-back:disabled{opacity:.4;cursor:default}
+.quiz-errors{margin-top:.9rem}
+.quiz-errors .err-item{margin:.5rem 0;padding:.6rem .9rem;border-radius:8px;background:var(--error-soft);border-left:3px solid var(--error-deep);font-size:.88em}
+.quiz-errors .err-item .err-q{font-weight:600;margin-bottom:.25rem;color:var(--color-text)}
+.quiz-errors .err-item .err-exp{color:var(--muted)}
+.quiz-err-hd{font-weight:700;color:var(--error-deep);margin:.8rem 0 .3rem}
+.quiz-teoria-link{display:inline-block;margin-top:.5rem;font-size:.85em;color:var(--color-primary);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:inherit}
+.quiz-end{text-align:center;padding:1.2rem .6rem}
+.quiz-end .big{font-size:2rem;font-weight:800;color:var(--color-secondary);font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.quiz-end p{margin:.4rem 0 .9rem;color:var(--muted)}
+
+/* ===================== Home ===================== */
+.home-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:.8rem;margin:.6rem 0}
+.home-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.05rem;
+  cursor:pointer;text-align:left;font-family:inherit;font-size:1em;color:inherit;box-shadow:var(--shadow);
+  transition:border-color .18s,box-shadow .18s,transform .14s}
+.home-card:hover{border-color:var(--color-primary);box-shadow:0 5px 16px rgba(37,99,235,.14);transform:translateY(-2px)}
+.home-card .ico{display:block;width:40px;height:40px;margin-bottom:.5rem;color:var(--color-primary)}
+.home-card strong{display:block;color:var(--color-secondary);font-size:.99em;margin-bottom:.15rem}
+.home-card span{display:block;color:var(--muted);font-size:.84em;line-height:1.45}
+.chips{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.6rem}
+.chips em{font-style:normal;background:var(--primary-soft);color:var(--color-secondary);border-radius:999px;padding:.12rem .6rem;font-size:.72em;font-weight:700}
+
+/* ===================== Footer ===================== */
+footer{border-top:1px solid var(--border);background:var(--surface);padding:1.1rem 1rem;text-align:center;color:var(--muted);font-size:.8em}
+
+/* ===================== Pulsante tema ===================== */
+.theme-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:.42rem .5rem;cursor:pointer;
+  color:var(--muted);line-height:0;transition:background .15s,border-color .15s,color .15s;flex:0 0 auto}
+.theme-btn:hover{background:var(--primary-soft);border-color:var(--color-primary);color:var(--color-secondary)}
+.theme-btn svg{width:18px;height:18px;display:block}
+.theme-btn .ico-sun{display:none}
+.theme-btn .ico-moon{display:block}
+[data-theme="dark"] .theme-btn .ico-sun{display:block}
+[data-theme="dark"] .theme-btn .ico-moon{display:none}
+
+/* ===================== Dark mode ===================== */
+[data-theme="dark"]{
+  --color-primary:#60a5fa;--color-secondary:#93c5fd;--color-accent:#fbbf24;
+  --color-success:#5fa0e6;--color-error:#e0975a;--color-bg:#111827;--color-text:#f3f4f6;
+  --surface:#1f2937;--border:#374151;--muted:#9ca3af;--primary-soft:#172554;
+  --accent-soft:#451a03;--accent-deep:#fbbf24;--success-soft:#15273a;--success-deep:#9cc3ec;
+  --error-soft:#3a2a12;--error-deep:#e0975a;--shadow:0 1px 3px rgba(0,0,0,.5);
+}
+[data-theme="dark"] .note-ok{color:#9cc3ec}
+[data-theme="dark"] .note-warn{color:#fde68a}
+[data-theme="dark"] .quiz-exp.ok,[data-theme="dark"] .prova-fb.ok{color:#9cc3ec}
+[data-theme="dark"] .quiz-exp.no,[data-theme="dark"] .prova-fb.no{color:#e7b98a}
+[data-theme="dark"] .quiz-btn.correct{color:#9cc3ec}
+[data-theme="dark"] .accordion details[open]{border-color:#2d4a7a}
+/* Canvas: disegnato su fondo chiaro, invertito in dark (colori preservati) */
+[data-theme="dark"] canvas.plot{filter:invert(1) hue-rotate(180deg)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Progressioni aritmetiche e geometriche</h1>
+    <span class="sub">Matematica · Successioni · Secondo biennio</span>
+    <button id="themeToggle" class="theme-btn" aria-label="Attiva tema scuro" title="Attiva tema scuro / chiaro">
+      <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+    </button>
+  </div>
+</header>
+
+<nav class="main" aria-label="Sezioni">
+  <div class="wrap" id="mainNav">
+    <button data-target="home" class="active">Home</button>
+    <button data-target="storia">Nota storica</button>
+    <button data-target="argen">Aritmetica · termine</button>
+    <button data-target="arsom">Aritmetica · somma</button>
+    <button data-target="geogen">Geometrica · termine</button>
+    <button data-target="geosom">Geometrica · somma</button>
+    <button data-target="riepilogo">Quiz riepilogativo</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============================================================ HOME ============================================================ -->
+<section class="scene active" id="home">
+  <div class="card">
+    <h2>Un percorso tra le successioni regolari</h2>
+    <p>Una <strong>successione</strong> è un elenco ordinato di numeri $a_1, a_2, a_3, \dots$ Alcune successioni crescono con una regola semplice e ricorrente: sono le <strong>progressioni</strong>. In una <strong>progressione aritmetica</strong> fra due termini consecutivi c'è sempre la stessa <em>differenza</em>; in una <strong>progressione geometrica</strong> c'è sempre lo stesso <em>rapporto</em>.</p>
+    <p>Per ciascuna studieremo due cose: come calcolare un <strong>termine qualsiasi</strong> (il termine generale $a_n$) e come sommare i <strong>primi $n$ termini</strong> ($S_n$). Ogni sotto sezione contiene <strong>Teoria</strong>, una <strong>Simulazione</strong> interattiva, <strong>Prova tu</strong> (esercizi con correzione e suggerimenti) e un <strong>Quiz</strong> da 10 domande. Alla fine trovi un <strong>quiz riepilogativo</strong> da 20 domande.</p>
+    <div class="chips"><em>Successioni</em><em>Termine generale</em><em>Somma di n termini</em><em>Serie geometrica</em></div>
+  </div>
+
+  <div class="home-grid">
+    <button class="home-card" data-target="storia">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <strong>Nota storica</strong><span>Da Euclide e Archimede alla leggenda degli scacchi e al piccolo Gauss.</span>
+    </button>
+    <button class="home-card" data-target="argen">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="20" y2="4"/><circle cx="6" cy="18" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="6" r="1.4"/></svg>
+      <strong>Aritmetica · termine</strong><span>Ragione costante e formula aₙ = a₁ + (n−1)·d.</span>
+    </button>
+    <button class="home-card" data-target="arsom">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 4H6l7 8-7 8h12"/></svg>
+      <strong>Aritmetica · somma</strong><span>Il trucco di Gauss e la somma Sₙ dei primi n termini.</span>
+    </button>
+    <button class="home-card" data-target="geogen">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20c5 0 6-15 11-15 3 0 5 2 7 4"/><circle cx="7" cy="14" r="1.3"/><circle cx="11" cy="6.5" r="1.3"/></svg>
+      <strong>Geometrica · termine</strong><span>Rapporto costante e formula aₙ = a₁·qⁿ⁻¹.</span>
+    </button>
+    <button class="home-card" data-target="geosom">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="3.2" height="9"/><rect x="10.4" y="6" width="3.2" height="14"/><rect x="16.8" y="3" width="3.2" height="17"/></svg>
+      <strong>Geometrica · somma</strong><span>La somma Sₙ e la serie geometrica infinita.</span>
+    </button>
+    <button class="home-card" data-target="riepilogo">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <strong>Quiz riepilogativo</strong><span>20 domande su tutto: aritmetiche, geometriche, termini e somme.</span>
+    </button>
+  </div>
+</section>
+
+<!-- ============================================================ NOTA STORICA ============================================================ -->
+<section class="scene" id="storia">
+  <div class="page-head">
+    <h2>Nota storica</h2>
+    <p class="lead">Le progressioni accompagnano la matematica fin dalle sue origini: problemi pratici, paradossi filosofici e leggende raccontano come l'uomo abbia imparato a sommare «infiniti» termini.</p>
+  </div>
+  <div class="card">
+    <div class="accordion">
+      <details open>
+        <summary><span>Egizi e Babilonesi: i primi problemi</span></summary>
+        <div class="acc-body">
+          <p>Nel <strong>papiro di Rhind</strong> (Egitto, ~1650 a.C.) compare un enigma celebre: «7 case, in ognuna 7 gatti, ognuno caccia 7 topi, ognuno mangia 7 spighe, ognuna avrebbe dato 7 misure di grano». La soluzione richiede di sommare la progressione geometrica $7+7^2+7^3+7^4+7^5$. Le tavolette babilonesi mostrano invece somme di progressioni aritmetiche usate per dividere eredità e razioni.</p>
+        </div>
+      </details>
+      <details>
+        <summary><span>Euclide e gli <em>Elementi</em> (Libro IX)</span></summary>
+        <div class="acc-body">
+          <p>Intorno al 300 a.C. Euclide dimostra, con il linguaggio della geometria, la formula della <strong>somma di una progressione geometrica</strong> (Proposizione IX.35). Nella Proposizione IX.36 la usa per costruire i <strong>numeri perfetti</strong>: se $1+2+4+\dots+2^{k}=2^{k+1}-1$ è un numero primo, allora $2^{k}\,(2^{k+1}-1)$ è perfetto (uguale alla somma dei suoi divisori, come $6$ e $28$).</p>
+        </div>
+      </details>
+      <details>
+        <summary><span>Zenone e Archimede: sommare l'infinito</span></summary>
+        <div class="acc-body">
+          <p>Il paradosso di <strong>Achille e la tartaruga</strong> di Zenone (V sec. a.C.) nasconde una progressione geometrica di ragione minore di 1: infiniti tratti sempre più piccoli la cui somma è però <em>finita</em>. <strong>Archimede</strong> (III sec. a.C.), nella <em>Quadratura della parabola</em>, calcola di fatto la serie $1+\tfrac14+\tfrac1{16}+\dots=\tfrac43$, anticipando di quasi duemila anni l'idea di serie convergente.</p>
+        </div>
+      </details>
+      <details>
+        <summary><span>La leggenda degli scacchi</span></summary>
+        <div class="acc-body">
+          <p>Il saggio <strong>Sissa</strong>, inventore degli scacchi, chiede al re come ricompensa 1 chicco di grano sulla prima casella, 2 sulla seconda, 4 sulla terza, raddoppiando ogni volta. È la progressione geometrica $1,2,4,8,\dots$ di ragione 2: sulle 64 caselle servirebbero
+          \[ 1+2+4+\dots+2^{63}=2^{64}-1\approx 1,8\cdot10^{19} \]
+          chicchi, più grano di quanto l'umanità ne abbia mai prodotto. Una lezione sulla <em>crescita esponenziale</em>.</p>
+        </div>
+      </details>
+      <details>
+        <summary><span>Il piccolo Gauss e la somma 1+2+…+100</span></summary>
+        <div class="acc-body">
+          <p>Si racconta che il maestro, per tenere occupata la classe, chiese di sommare i numeri da 1 a 100. Il giovane <strong>Carl Friedrich Gauss</strong> (fine '700) rispose quasi subito: <strong>5050</strong>. Aveva notato che accoppiando $1+100,\;2+99,\;3+98,\dots$ si ottengono 50 coppie da 101. È esattamente l'idea dietro la formula della somma di una progressione aritmetica:
+          \[ S_n=\frac{n\,(a_1+a_n)}{2}. \]</p>
+          <p class="note-ok">Attenzione: non ogni successione regolare è una progressione. La celebre successione di <strong>Fibonacci</strong> ($1,1,2,3,5,8,\dots$), diffusa in Europa dal <em>Liber Abaci</em> (1202), non ha né differenza né rapporto costanti: non è né aritmetica né geometrica.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ ARITMETICA · TERMINE GENERALE ============================================================ -->
+<section class="scene" id="argen">
+  <div class="page-head">
+    <h2>Progressione aritmetica — termine generale</h2>
+    <p class="lead">Ogni termine si ottiene dal precedente aggiungendo sempre lo stesso numero.</p>
+  </div>
+  <nav class="sec-tabs" role="tablist" aria-label="Sezioni">
+    <button class="sec-tab active" data-sectab="teoria" role="tab" aria-selected="true">Teoria</button>
+    <button class="sec-tab" data-sectab="sim" role="tab" aria-selected="false">Simulazione</button>
+    <button class="sec-tab" data-sectab="prova" role="tab" aria-selected="false">Prova tu</button>
+    <button class="sec-tab" data-sectab="quiz" role="tab" aria-selected="false">Quiz</button>
+  </nav>
+
+  <div class="sec-panel" data-sectab="teoria">
+    <div class="card">
+      <h2>Definizione</h2>
+      <p>Una <strong>progressione aritmetica</strong> è una successione in cui la differenza tra ogni termine e il precedente è costante. Questa costante si chiama <strong>ragione</strong> e si indica con $d$:</p>
+      <div class="formula center">$d = a_{n}-a_{n-1}$ <span class="why">la stessa per ogni $n\ge 2$</span></div>
+      <p>Quindi si passa da un termine al successivo <strong>aggiungendo</strong> $d$: $a_{n}=a_{n-1}+d$. Se $d>0$ la progressione è crescente, se $d<0$ è decrescente, se $d=0$ è costante.</p>
+      <p>Esempio: $3,\,7,\,11,\,15,\,19,\dots$ ha primo termine $a_1=3$ e ragione $d=4$.</p>
+
+      <h3>Il termine generale</h3>
+      <p>Partendo da $a_1$ e aggiungendo $d$ una volta per arrivare ad $a_2$, due volte per $a_3$, … per arrivare ad $a_n$ aggiungiamo $d$ esattamente $(n-1)$ volte:</p>
+      <div class="formula center big">$a_n = a_1 + (n-1)\,d$</div>
+      <p>Questa formula permette di calcolare un termine <em>qualunque</em> senza scrivere tutti i precedenti. Invertendola si ricavano anche gli altri elementi:</p>
+      <div class="formula">$d = \dfrac{a_n-a_1}{n-1}\qquad a_1 = a_n-(n-1)d \qquad n = \dfrac{a_n-a_1}{d}+1$</div>
+
+      <h3>Proprietà del termine medio</h3>
+      <p>In una progressione aritmetica ogni termine (tranne gli estremi) è la <strong>media aritmetica</strong> dei due termini adiacenti:</p>
+      <div class="formula center">$a_n = \dfrac{a_{n-1}+a_{n+1}}{2}$</div>
+      <p>Più in generale, termini <strong>equidistanti</strong> dagli estremi hanno somma costante: $a_1+a_n=a_2+a_{n-1}=\dots$ (è il cuore del trucco di Gauss).</p>
+      <div class="note-ok">Per riconoscere una progressione aritmetica basta verificare che le differenze consecutive $a_2-a_1,\;a_3-a_2,\dots$ siano tutte uguali.</div>
+    </div>
+  </div>
+
+  <div class="sec-panel" data-sectab="sim" hidden>
+    <div class="card">
+      <h2>Simulazione — crescita lineare</h2>
+      <p>Muovi i cursori: i termini di una progressione aritmetica sono allineati, perché $a_n$ dipende da $n$ in modo <strong>lineare</strong>. La pendenza della retta è la ragione $d$.</p>
+      <div class="sim-layout">
+        <div class="sim-pane">
+          <canvas class="plot" id="agPlot" aria-label="Grafico dei termini della progressione aritmetica"></canvas>
+          <div class="legend"><span><i style="background:#2563eb"></i>termine aₙ</span></div>
+          <div class="seqline" id="agSeq"></div>
+        </div>
+        <div class="ctrl-pane">
+          <div class="ctrl">
+            <label><span class="nm">$a_1$</span><input type="range" id="agA" min="-6" max="10" step="1" value="2"><span class="v" id="agAv">2</span></label>
+            <label><span class="nm">$d$</span><input type="range" id="agD" min="-5" max="6" step="1" value="3"><span class="v" id="agDv">3</span></label>
+            <label><span class="nm">$n$</span><input type="range" id="agN" min="3" max="14" step="1" value="8"><span class="v" id="agNv">8</span></label>
+          </div>
+          <div class="read" id="agRead"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-panel" data-sectab="prova" hidden>
+    <div class="card">
+      <h2>Prova tu — calcola un termine</h2>
+      <p class="lead">Calcola il termine richiesto. Inserisci solo il numero, poi premi <strong>Verifica</strong>. Hai suggerimenti progressivi se ti servono.</p>
+      <div class="pratica" data-gen="ag"></div>
+    </div>
+  </div>
+
+  <div class="sec-panel" data-sectab="quiz" hidden>
+    <div class="card">
+      <h2>Quiz — termine generale (aritmetiche)</h2>
+      <div class="quiz" data-quiz="argen_q"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ ARITMETICA · SOMMA ============================================================ -->
+<section class="scene" id="arsom">
+  <div class="page-head">
+    <h2>Progressione aritmetica — somma di n termini</h2>
+    <p class="lead">Come sommare i primi $n$ termini senza addizionarli uno per uno.</p>
+  </div>
+  <nav class="sec-tabs" role="tablist" aria-label="Sezioni">
+    <button class="sec-tab active" data-sectab="teoria" role="tab" aria-selected="true">Teoria</button>
+    <button class="sec-tab" data-sectab="sim" role="tab" aria-selected="false">Simulazione</button>
+    <button class="sec-tab" data-sectab="prova" role="tab" aria-selected="false">Prova tu</button>
+    <button class="sec-tab" data-sectab="quiz" role="tab" aria-selected="false">Quiz</button>
+  </nav>
+
+  <div class="sec-panel" data-sectab="teoria">
+    <div class="card">
+      <h2>Il trucco di Gauss</h2>
+      <p>Vogliamo la somma $S_n=a_1+a_2+\dots+a_n$. Scriviamola due volte, una in ordine diretto e una inverso, e sommiamo colonna per colonna:</p>
+      <div class="formula">
+        $S_n = a_1 + a_2 + \dots + a_n$<br>
+        $S_n = a_n + a_{n-1} + \dots + a_1$
+        <span class="why">sommando: ogni colonna vale $a_1+a_n$, e le colonne sono $n$</span>
+      </div>
+      <p>Si ottiene $2S_n = n\,(a_1+a_n)$, da cui la formula fondamentale:</p>
+      <div class="formula center big">$S_n = \dfrac{n\,(a_1+a_n)}{2}$</div>
+      <p>«Numero dei termini per semisomma degli estremi». Sostituendo $a_n=a_1+(n-1)d$ si ottiene la forma che usa solo $a_1$ e $d$:</p>
+      <div class="formula center">$S_n = \dfrac{n\,[\,2a_1+(n-1)d\,]}{2}$</div>
+
+      <h3>Un caso celebre</h3>
+      <p>La somma dei primi $n$ numeri naturali è la progressione con $a_1=1$ e $d=1$:</p>
+      <div class="formula center">$1+2+3+\dots+n = \dfrac{n\,(n+1)}{2}$</div>
+      <p>Per $n=100$ si ottiene $\dfrac{100\cdot101}{2}=5050$, il risultato del piccolo Gauss.</p>
+      <div class="note-ok">Serve conoscere <strong>tre</strong> dei quattro elementi $a_1,\,a_n,\,n,\,d$ per calcolare $S_n$: se manca $a_n$ lo si ricava prima dal termine generale.</div>
+    </div>
+  </div>
+
+  <div class="sec-panel" data-sectab="sim" hidden>
+    <div class="card">
+      <h2>Simulazione — il rettangolo di Gauss</h2>
+      <p>Le barre blu sono i termini $a_1,\dots,a_n$. Sopra ognuna, in arancio, è disegnato il termine «specchiato» $a_{n+1-k}$: ogni colonna raggiunge la stessa altezza $a_1+a_n$. Le due copie formano un <strong>rettangolo</strong> di area $n\,(a_1+a_n)$, quindi $S_n$ è la sua metà.</p>
+      <div class="sim-layout">
+        <div class="sim-pane">
+          <canvas class="plot" id="asPlot" aria-label="Rettangolo di Gauss: barre dei termini e copia specchiata"></canvas>
+          <div class="legend"><span><i style="background:#2563eb"></i>termini aₖ</span><span><i style="background:#f3b34d"></i>copia specchiata</span></div>
+        </div>
+        <div class="ctrl-pane">
+          <div class="ctrl">
+            <label><span class="nm">$a_1$</span><input type="range" id="asA" min="1" max="10" step="1" value="2"><span class="v" id="asAv">2</span></label>
+            <label><span class="nm">$d$</span><input type="range" id="asD" min="0" max="6" step="1" value="2"><span class="v" id="asDv">2</span></label>
+            <label><span class="nm">$n$</span><input type="range" id="asN" min="2" max="12" step="1" value="6"><span class="v" id="asNv">6</span></label>
+          </div>
+          <div class="read" id="asRead"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-panel" data-sectab="prova" hidden>
+    <div class="card">
+      <h2>Prova tu — calcola la somma</h2>
+      <p class="lead">Somma i primi $n$ termini. Inserisci solo il numero e premi <strong>Verifica</strong>.</p>
+      <div class="pratica" data-gen="as"></div>
+    </div>
+  </div>
+
+  <div class="sec-panel" data-sectab="quiz" hidden>
+    <div class="card">
+      <h2>Quiz — somma (aritmetiche)</h2>
+      <div class="quiz" data-quiz="arsom_q"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ GEOMETRICA · TERMINE GENERALE ============================================================ -->
+<section class="scene" id="geogen">
+  <div class="page-head">
+    <h2>Progressione geometrica — termine generale</h2>
+    <p class="lead">Ogni termine si ottiene dal precedente moltiplicando sempre per lo stesso numero.</p>
+  </div>
+  <nav class="sec-tabs" role="tablist" aria-label="Sezioni">
+    <button class="sec-tab active" data-sectab="teoria" role="tab" aria-selected="true">Teoria</button>
+    <button class="sec-tab" data-sectab="sim" role="tab" aria-selected="false">Simulazione</button>
+    <button class="sec-tab" data-sectab="prova" role="tab" aria-selected="false">Prova tu</button>
+    <button class="sec-tab" data-sectab="quiz" role="tab" aria-selected="false">Quiz</button>
+  </nav>
+
+  <div class="sec-panel" data-sectab="teoria">
+    <div class="card">
+      <h2>Definizione</h2>
+      <p>Una <strong>progressione geometrica</strong> è una successione (a termini non nulli) in cui il rapporto tra ogni termine e il precedente è costante. Questa costante si chiama <strong>ragione</strong> e si indica con $q$:</p>
+      <div class="formula center">$q = \dfrac{a_n}{a_{n-1}}$ <span class="why">la stessa per ogni $n\ge 2$</span></div>
+      <p>Quindi si passa da un termine al successivo <strong>moltiplicando</strong> per $q$: $a_n=a_{n-1}\cdot q$. Esempio: $2,\,6,\,18,\,54,\dots$ ha $a_1=2$ e $q=3$.</p>
+
+      <h3>Il termine generale</h3>
+      <p>Partendo da $a_1$ e moltiplicando per $q$ esattamente $(n-1)$ volte si arriva ad $a_n$:</p>
+      <div class="formula center big">$a_n = a_1 \cdot q^{\,n-1}$</div>
+      <p>Da cui, invertendo: $\;q^{\,n-1}=\dfrac{a_n}{a_1}\;$ e $\;a_1=\dfrac{a_n}{q^{\,n-1}}$.</p>
+
+      <h3>Il comportamento dipende da $q$</h3>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <tr><th>Ragione $q$</th><th>Andamento (con $a_1>0$)</th></tr>
+          <tr><td class="m">$q>1$</td><td>cresce sempre più rapidamente (crescita esponenziale)</td></tr>
+          <tr><td class="m">$q=1$</td><td>successione costante: tutti i termini uguali ad $a_1$</td></tr>
+          <tr><td class="m">$0&lt;q&lt;1$</td><td>decresce avvicinandosi a zero</td></tr>
+          <tr><td class="m">$q&lt;0$</td><td>termini di segno alternato (positivo, negativo, positivo, …)</td></tr>
+        </table>
+      </div>
+
+      <h3>Proprietà del termine medio</h3>
+      <p>Ogni termine è <strong>medio geometrico</strong> dei due adiacenti (in valore assoluto): $a_n^{\,2}=a_{n-1}\cdot a_{n+1}$, cioè per termini positivi</p>
+      <div class="formula center">$a_n = \sqrt{a_{n-1}\cdot a_{n+1}}$</div>
+      <div class="note-ok">Per riconoscere una progressione geometrica basta verificare che i rapporti $\dfrac{a_2}{a_1},\dfrac{a_3}{a_2},\dots$ siano tutti uguali.</div>
+    </div>
+  </div>
+
+  <div class="sec-panel" data-sectab="sim" hidden>
+    <div class="card">
+      <h2>Simulazione — crescita e decrescita esponenziale</h2>
+      <p>Con $q>1$ i punti «decollano»; con $0&lt;q&lt;1$ precipitano verso lo zero senza mai raggiungerlo. Confronta con la retta della progressione aritmetica: qui la crescita è ben più rapida.</p>
+      <div class="sim-layout">
+        <div class="sim-pane">
+          <canvas class="plot" id="ggPlot" aria-label="Grafico dei termini della progressione geometrica"></canvas>
+          <div class="legend"><span><i style="background:#2563eb"></i>termine aₙ</span></div>
+          <div class="seqline" id="ggSeq"></div>
+        </div>
+        <div class="ctrl-pane">
+          <div class="ctrl">
+            <label><span class="nm">$a_1$</span><input type="range" id="ggA" min="1" max="6" step="1" value="2"><span class="v" id="ggAv">2</span></label>
+            <label><span class="nm">$q$</span><input type="range" id="ggQ" min="0.2" max="3" step="0.1" value="1.5"><span class="v" id="ggQv">1.5</span></label>
+            <label><span class="nm">$n$</span><input type="range" id="ggN" min="3" max="12" step="1" value="7"><span class="v" id="ggNv">7</span></label>
+          </div>
+          <div class="read" id="ggRead"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-panel" data-sectab="prova" hidden>
+    <div class="card">
+      <h2>Prova tu — calcola un termine</h2>
+      <p class="lead">Calcola il termine richiesto usando $a_n=a_1\,q^{\,n-1}$.</p>
+      <div class="pratica" data-gen="gg"></div>
+    </div>
+  </div>
+
+  <div class="sec-panel" data-sectab="quiz" hidden>
+    <div class="card">
+      <h2>Quiz — termine generale (geometriche)</h2>
+      <div class="quiz" data-quiz="geogen_q"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ GEOMETRICA · SOMMA ============================================================ -->
+<section class="scene" id="geosom">
+  <div class="page-head">
+    <h2>Progressione geometrica — somma di n termini</h2>
+    <p class="lead">Una formula compatta per sommare termini che crescono (o calano) in modo esponenziale.</p>
+  </div>
+  <nav class="sec-tabs" role="tablist" aria-label="Sezioni">
+    <button class="sec-tab active" data-sectab="teoria" role="tab" aria-selected="true">Teoria</button>
+    <button class="sec-tab" data-sectab="sim" role="tab" aria-selected="false">Simulazione</button>
+    <button class="sec-tab" data-sectab="prova" role="tab" aria-selected="false">Prova tu</button>
+    <button class="sec-tab" data-sectab="quiz" role="tab" aria-selected="false">Quiz</button>
+  </nav>
+
+  <div class="sec-panel" data-sectab="teoria">
+    <div class="card">
+      <h2>La formula della somma</h2>
+      <p>Vogliamo $S_n=a_1+a_1 q+a_1 q^2+\dots+a_1 q^{\,n-1}$. Moltiplichiamo tutto per $q$ e sottraiamo:</p>
+      <div class="formula">
+        $S_n = a_1 + a_1q + \dots + a_1 q^{\,n-1}$<br>
+        $q\,S_n = \phantom{a_1 +{}} a_1q + \dots + a_1 q^{\,n-1} + a_1 q^{\,n}$
+        <span class="why">sottraendo, quasi tutti i termini si cancellano: $S_n-qS_n = a_1 - a_1 q^{\,n}$</span>
+      </div>
+      <p>Da $S_n(1-q)=a_1(1-q^{\,n})$, se $q\neq 1$, si ricava:</p>
+      <div class="formula center big">$S_n = a_1\,\dfrac{q^{\,n}-1}{q-1}\qquad(q\neq 1)$</div>
+      <p>Se invece $q=1$ tutti i termini valgono $a_1$ e quindi $S_n=n\,a_1$.</p>
+
+      <h3>La serie geometrica infinita</h3>
+      <p>Se $|q|<1$, elevando $q$ a potenze sempre più grandi il termine $q^{\,n}$ si avvicina a zero. Sommando <strong>infiniti</strong> termini si ottiene un valore finito:</p>
+      <div class="formula center">$S = a_1+a_1q+a_1q^2+\dots = \dfrac{a_1}{1-q}\qquad(|q|<1)$</div>
+      <p>È ciò che accade in Zenone e in Archimede: ad esempio, con $a_1=1$ e $q=\tfrac12$ la somma è $\dfrac{1}{1-\frac12}=2$; con $q=\tfrac14$ si ottiene $\dfrac{1}{1-\frac14}=\dfrac43$.</p>
+      <div class="note-warn">Se $|q|\ge 1$ (e $a_1\neq0$) i termini non si rimpiccioliscono: la somma infinita cresce senza limite e <strong>non</strong> converge.</div>
+    </div>
+  </div>
+
+  <div class="sec-panel" data-sectab="sim" hidden>
+    <div class="card">
+      <h2>Simulazione — somme parziali e convergenza</h2>
+      <p>Le barre mostrano le somme parziali $S_1, S_2, \dots, S_n$. Con $q<1$ le barre si «appiattiscono» verso la linea tratteggiata arancio, che è il valore limite $\dfrac{a_1}{1-q}$: la serie converge. Con $q\ge 1$ le barre continuano a salire.</p>
+      <div class="sim-layout">
+        <div class="sim-pane">
+          <canvas class="plot" id="gsPlot" aria-label="Somme parziali della progressione geometrica"></canvas>
+          <div class="legend"><span><i style="background:#2563eb"></i>somma parziale Sₖ</span><span><i style="background:#f59e0b"></i>limite a₁/(1−q)</span></div>
+        </div>
+        <div class="ctrl-pane">
+          <div class="ctrl">
+            <label><span class="nm">$a_1$</span><input type="range" id="gsA" min="1" max="6" step="1" value="3"><span class="v" id="gsAv">3</span></label>
+            <label><span class="nm">$q$</span><input type="range" id="gsQ" min="0.2" max="2.5" step="0.1" value="0.5"><span class="v" id="gsQv">0.5</span></label>
+            <label><span class="nm">$n$</span><input type="range" id="gsN" min="2" max="12" step="1" value="8"><span class="v" id="gsNv">8</span></label>
+          </div>
+          <div class="read" id="gsRead"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-panel" data-sectab="prova" hidden>
+    <div class="card">
+      <h2>Prova tu — calcola la somma</h2>
+      <p class="lead">Somma i primi $n$ termini con $S_n=a_1\dfrac{q^{\,n}-1}{q-1}$.</p>
+      <div class="pratica" data-gen="gs"></div>
+    </div>
+  </div>
+
+  <div class="sec-panel" data-sectab="quiz" hidden>
+    <div class="card">
+      <h2>Quiz — somma (geometriche)</h2>
+      <div class="quiz" data-quiz="geosom_q"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ QUIZ RIEPILOGATIVO ============================================================ -->
+<section class="scene" id="riepilogo">
+  <div class="page-head">
+    <h2>Quiz riepilogativo</h2>
+    <p class="lead">20 domande su tutto il percorso: progressioni aritmetiche e geometriche, termini generali e somme. Una domanda per volta, con correzione immediata e ripasso finale degli errori.</p>
+  </div>
+  <div class="card">
+    <div class="quiz" data-quiz="rip_q"></div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Progressioni aritmetiche e geometriche · App didattica di matematica · Un unico file HTML, funziona offline e da mobile.
+</footer>
+
+<script>
+'use strict';
+/* ================================================================
+   Utility di base
+   ================================================================ */
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const ri=n=>Math.floor(Math.random()*n);
+function fmt(x){
+  if(!isFinite(x))return '—';
+  const r=Math.round(x);
+  return Math.abs(x-r)<1e-9?String(r):(+x.toFixed(2)).toString();
+}
+function typeset(el){
+  if(!window.renderMathInElement)return;
+  try{
+    renderMathInElement(el,{delimiters:[
+      {left:'$$',right:'$$',display:true},
+      {left:'$',right:'$',display:false},
+      {left:'\\(',right:'\\)',display:false},
+      {left:'\\[',right:'\\]',display:true}
+    ],throwOnError:false});
+  }catch(e){}
+}
+
+/* ================================================================
+   Navigazione fra scene
+   ================================================================ */
+const navBtns=$$('#mainNav button');
+function show(id){
+  $$('.scene').forEach(s=>s.classList.toggle('active',s.id===id));
+  navBtns.forEach(b=>b.classList.toggle('active',b.dataset.target===id));
+  if(location.hash!=='#'+id)history.replaceState(null,'','#'+id);
+  window.scrollTo(0,0);
+  requestAnimationFrame(()=>requestAnimationFrame(redrawVisible));
+}
+navBtns.forEach(b=>b.addEventListener('click',()=>show(b.dataset.target)));
+$$('.home-card').forEach(b=>b.addEventListener('click',()=>show(b.dataset.target)));
+window.addEventListener('hashchange',()=>{
+  const id=location.hash.slice(1);
+  if(document.getElementById(id))show(id);
+});
+
+/* ================================================================
+   Sec-tabs (Teoria / Simulazione / Prova tu / Quiz)
+   ================================================================ */
+$$('.sec-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    const sec=tab.closest('section');if(!sec)return;
+    sec.querySelectorAll('.sec-tab').forEach(t=>{
+      t.classList.toggle('active',t===tab);
+      t.setAttribute('aria-selected',t===tab);
+    });
+    sec.querySelectorAll('.sec-panel').forEach(p=>{
+      p.hidden=p.dataset.sectab!==tab.dataset.sectab;
+    });
+    if(tab.dataset.sectab==='sim')requestAnimationFrame(()=>requestAnimationFrame(redrawVisible));
+  });
+});
+
+/* ================================================================
+   Motore grafico (canvas) — comune alle simulazioni
+   ================================================================ */
+const SIMS=[];
+function regSim(canvas,draw){if(canvas)SIMS.push({canvas,draw})}
+function redrawVisible(){SIMS.forEach(s=>{if(s.canvas.offsetParent!==null)s.draw()})}
+let rszT=null;
+window.addEventListener('resize',()=>{clearTimeout(rszT);rszT=setTimeout(redrawVisible,120)});
+
+function csetup(cv){
+  const dpr=window.devicePixelRatio||1;
+  const w=Math.max(260, cv.clientWidth || (cv.parentElement?cv.parentElement.clientWidth:320));
+  const h=Math.round(w*0.66);
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);cv.style.height=h+'px';
+  const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
+  return {g,w,h};
+}
+/* Disegna una serie di valori (per indice 1..N) come punti+linea o barre */
+function chart(cv,terms,opt){
+  opt=opt||{};
+  const {g,w,h}=csetup(cv);
+  const N=terms.length;
+  const padL=42,padR=16,padT=16,padB=28;
+  const vals=terms.slice();
+  if(opt.asym!=null&&isFinite(opt.asym))vals.push(opt.asym);
+  if(opt.top!=null)vals.push(opt.top);
+  let ymax=Math.max(0,...vals),ymin=Math.min(0,...vals);
+  if(ymax===ymin)ymax=ymin+1;
+  const padv=(ymax-ymin)*0.1;ymax+=padv;ymin-=padv;
+  const X=i=> padL + (N<=1?(w-padL-padR)/2:(w-padL-padR)*i/(N-1));
+  const Y=v=> padT + (h-padT-padB)*(1-(v-ymin)/(ymax-ymin));
+  g.lineWidth=1;g.strokeStyle='#9aa5b1';
+  // asse y
+  g.beginPath();g.moveTo(padL,padT);g.lineTo(padL,h-padB);g.stroke();
+  // linea dello zero
+  g.strokeStyle='#64748b';g.setLineDash([3,3]);
+  g.beginPath();g.moveTo(padL,Y(0));g.lineTo(w-padR,Y(0));g.stroke();g.setLineDash([]);
+  // etichette
+  g.fillStyle='#64748b';g.font='11px "JetBrains Mono",monospace';
+  g.textAlign='center';g.textBaseline='top';
+  const stepx=N<=12?1:2;
+  for(let i=0;i<N;i++){if(i%stepx===0||i===N-1)g.fillText(String(i+1),X(i),h-padB+6);}
+  g.textAlign='right';g.textBaseline='middle';
+  g.fillText(fmt(ymax),padL-6,Y(ymax)+2);
+  g.fillText('0',padL-6,Y(0));
+  if(ymin<-1e-9)g.fillText(fmt(ymin),padL-6,Y(ymin));
+  // asintoto (limite serie)
+  if(opt.asym!=null&&isFinite(opt.asym)){
+    g.save();g.strokeStyle='#f59e0b';g.lineWidth=1.8;g.setLineDash([6,4]);
+    g.beginPath();g.moveTo(padL,Y(opt.asym));g.lineTo(w-padR,Y(opt.asym));g.stroke();g.restore();
+  }
+  if(opt.bars){
+    const slot=(w-padL-padR)/N;
+    const bw=Math.max(5,slot*0.6);
+    for(let i=0;i<N;i++){
+      const v=terms[i];const x=X(i)-bw/2;const y0=Y(0),y1=Y(v);
+      if(opt.mirror){
+        const m=terms[N-1-i];
+        g.fillStyle='rgba(243,179,77,.85)';
+        const yt=Y(v+m);
+        g.fillRect(x,Math.min(Y(v),yt),bw,Math.abs(Y(v)-yt));
+      }
+      g.fillStyle=v>=0?'#2563eb':'#f59e0b';
+      g.fillRect(x,Math.min(y0,y1),bw,Math.max(1,Math.abs(y1-y0)));
+    }
+  }else{
+    g.strokeStyle='#2563eb';g.lineWidth=2;g.beginPath();
+    terms.forEach((v,i)=>{const px=X(i),py=Y(v);i?g.lineTo(px,py):g.moveTo(px,py)});
+    g.stroke();
+    terms.forEach((v,i)=>{
+      g.fillStyle='#2563eb';g.beginPath();g.arc(X(i),Y(v),4,0,7);g.fill();
+      g.strokeStyle='#ffffff';g.lineWidth=1.5;g.stroke();
+    });
+  }
+}
+
+/* ---- Aritmetica: termine generale ---- */
+(function(){
+  const cv=$('#agPlot');if(!cv)return;
+  const a=$('#agA'),d=$('#agD'),n=$('#agN');
+  function update(){
+    const A=+a.value,D=+d.value,N=+n.value;
+    $('#agAv').textContent=A;$('#agDv').textContent=D;$('#agNv').textContent=N;
+    const terms=[];for(let k=1;k<=N;k++)terms.push(A+(k-1)*D);
+    const an=terms[N-1];
+    $('#agSeq').textContent=terms.map(fmt).join(',  ');
+    $('#agRead').innerHTML=
+      '<div class="it"><span class="l">ragione d</span><span class="v">'+fmt(D)+'</span></div>'+
+      '<div class="it"><span class="l">termine a'+N+'</span><span class="v">'+fmt(an)+'</span></div>'+
+      '<div class="it"><span class="l">a_n = a_1+(n-1)d</span><span class="v">'+fmt(A)+'+'+(N-1)+'·'+fmt(D)+'</span></div>';
+    chart(cv,terms,{});
+  }
+  [a,d,n].forEach(el=>el.addEventListener('input',update));
+  regSim(cv,update);update();
+})();
+
+/* ---- Aritmetica: somma (rettangolo di Gauss) ---- */
+(function(){
+  const cv=$('#asPlot');if(!cv)return;
+  const a=$('#asA'),d=$('#asD'),n=$('#asN');
+  function update(){
+    const A=+a.value,D=+d.value,N=+n.value;
+    $('#asAv').textContent=A;$('#asDv').textContent=D;$('#asNv').textContent=N;
+    const terms=[];for(let k=1;k<=N;k++)terms.push(A+(k-1)*D);
+    const an=terms[N-1];const S=N*(A+an)/2;
+    $('#asRead').innerHTML=
+      '<div class="it"><span class="l">a'+N+'</span><span class="v">'+fmt(an)+'</span></div>'+
+      '<div class="it"><span class="l">a_1 + a_n</span><span class="v">'+fmt(A+an)+'</span></div>'+
+      '<div class="it"><span class="l">somma S'+N+'</span><span class="v">'+fmt(S)+'</span></div>';
+    chart(cv,terms,{bars:true,mirror:true,top:A+an});
+  }
+  [a,d,n].forEach(el=>el.addEventListener('input',update));
+  regSim(cv,update);update();
+})();
+
+/* ---- Geometrica: termine generale ---- */
+(function(){
+  const cv=$('#ggPlot');if(!cv)return;
+  const a=$('#ggA'),q=$('#ggQ'),n=$('#ggN');
+  function update(){
+    const A=+a.value,Q=+q.value,N=+n.value;
+    $('#ggAv').textContent=A;$('#ggQv').textContent=Q.toFixed(1);$('#ggNv').textContent=N;
+    const terms=[];for(let k=1;k<=N;k++)terms.push(A*Math.pow(Q,k-1));
+    const an=terms[N-1];
+    $('#ggSeq').textContent=terms.map(fmt).join(',  ');
+    $('#ggRead').innerHTML=
+      '<div class="it"><span class="l">ragione q</span><span class="v">'+Q.toFixed(1)+'</span></div>'+
+      '<div class="it"><span class="l">termine a'+N+'</span><span class="v">'+fmt(an)+'</span></div>'+
+      '<div class="it"><span class="l">andamento</span><span class="v">'+(Q>1?'cresce':(Q<1?'decresce':'costante'))+'</span></div>';
+    chart(cv,terms,{});
+  }
+  [a,q,n].forEach(el=>el.addEventListener('input',update));
+  regSim(cv,update);update();
+})();
+
+/* ---- Geometrica: somme parziali e convergenza ---- */
+(function(){
+  const cv=$('#gsPlot');if(!cv)return;
+  const a=$('#gsA'),q=$('#gsQ'),n=$('#gsN');
+  function update(){
+    const A=+a.value,Q=+q.value,N=+n.value;
+    $('#gsAv').textContent=A;$('#gsQv').textContent=Q.toFixed(1);$('#gsNv').textContent=N;
+    const sums=[];let acc=0;
+    for(let k=1;k<=N;k++){acc+=A*Math.pow(Q,k-1);sums.push(acc);}
+    const Sn=sums[N-1];
+    const converge=Math.abs(Q)<1;
+    const lim=converge?A/(1-Q):null;
+    $('#gsRead').innerHTML=
+      '<div class="it"><span class="l">ragione q</span><span class="v">'+Q.toFixed(1)+'</span></div>'+
+      '<div class="it"><span class="l">somma S'+N+'</span><span class="v">'+fmt(Sn)+'</span></div>'+
+      '<div class="it"><span class="l">limite (∞)</span><span class="v">'+(converge?fmt(lim):'diverge')+'</span></div>';
+    chart(cv,sums,{bars:true,asym:lim});
+  }
+  [a,q,n].forEach(el=>el.addEventListener('input',update));
+  regSim(cv,update);update();
+})();
+
+/* ================================================================
+   Prova tu — motore generico
+   ================================================================ */
+const PRATICA={
+  ag(){
+    const A=ri(16)-5; let D=ri(11)-5; if(D===0)D=2; const N=4+ri(9);
+    const an=A+(N-1)*D;
+    return{
+      q:'Data la progressione aritmetica con $a_1='+A+'$ e ragione $d='+D+'$, calcola il termine $a_{'+N+'}$.',
+      lab:'$a_{'+N+'}=$', answer:an, tol:1e-6,
+      hints:['Usa il termine generale: $a_n=a_1+(n-1)\\,d$.',
+             'Sostituisci i valori: $a_{'+N+'}='+A+'+('+N+'-1)\\cdot('+D+')$.'],
+      sol:'$a_{'+N+'}='+A+'+'+(N-1)+'\\cdot('+D+')='+an+'$.'
+    };
+  },
+  as(){
+    const A=ri(10)-4; let D=ri(9)-4; if(D===0)D=1; const N=4+ri(8);
+    const an=A+(N-1)*D; const S=N*(A+an)/2;
+    return{
+      q:'Calcola la somma dei primi $'+N+'$ termini della progressione aritmetica con $a_1='+A+'$ e $d='+D+'$.',
+      lab:'$S_{'+N+'}=$', answer:S, tol:1e-6,
+      hints:['Trova prima l\'ultimo termine: $a_{'+N+'}=a_1+(n-1)d$.',
+             'Poi applica $S_n=\\dfrac{n\\,(a_1+a_n)}{2}$.'],
+      sol:'$a_{'+N+'}='+an+'$, quindi $S_{'+N+'}=\\dfrac{'+N+'\\,('+A+'+('+an+'))}{2}='+S+'$.'
+    };
+  },
+  gg(){
+    const A=1+ri(4); const qs=[2,3,-2]; const Q=qs[ri(qs.length)]; const N=3+ri(4);
+    const an=A*Math.pow(Q,N-1);
+    return{
+      q:'Nella progressione geometrica con $a_1='+A+'$ e ragione $q='+Q+'$, calcola $a_{'+N+'}$.',
+      lab:'$a_{'+N+'}=$', answer:an, tol:1e-6,
+      hints:['Usa il termine generale: $a_n=a_1\\cdot q^{\\,n-1}$.',
+             'Sostituisci: $a_{'+N+'}='+A+'\\cdot('+Q+')^{'+(N-1)+'}$.'],
+      sol:'$a_{'+N+'}='+A+'\\cdot('+Q+')^{'+(N-1)+'}='+an+'$.'
+    };
+  },
+  gs(){
+    const A=1+ri(4); const qs=[2,3]; const Q=qs[ri(2)]; const N=3+ri(4);
+    const S=A*(Math.pow(Q,N)-1)/(Q-1);
+    return{
+      q:'Calcola la somma dei primi $'+N+'$ termini della progressione geometrica con $a_1='+A+'$ e $q='+Q+'$.',
+      lab:'$S_{'+N+'}=$', answer:S, tol:1e-6,
+      hints:['Usa $S_n=a_1\\dfrac{q^{\\,n}-1}{q-1}$ (valida per $q\\neq1$).',
+             'Sostituisci: $S_{'+N+'}='+A+'\\cdot\\dfrac{'+Q+'^{'+N+'}-1}{'+Q+'-1}$.'],
+      sol:'$S_{'+N+'}='+A+'\\cdot\\dfrac{'+Q+'^{'+N+'}-1}{'+(Q-1)+'}='+S+'$.'
+    };
+  }
+};
+function initPratica(el,gen){
+  let cur,shown,done;
+  function neu(){
+    cur=gen();shown=0;done=false;
+    el.innerHTML=
+      '<div class="prova-q">'+cur.q+'</div>'+
+      '<div class="prova-row"><span class="lab">'+cur.lab+'</span>'+
+        '<input type="number" step="any" inputmode="decimal" class="prova-input" aria-label="la tua risposta"></div>'+
+      '<div class="btn-row">'+
+        '<button class="btn btn-primary prova-ck">Verifica</button>'+
+        '<button class="btn btn-ghost prova-hint">Suggerimento</button>'+
+        '<button class="btn btn-ghost prova-sol">Mostra soluzione</button>'+
+        '<button class="btn btn-ghost prova-new">Nuovo esercizio</button>'+
+      '</div>'+
+      '<div class="prova-hints"></div>'+
+      '<div class="prova-fb" hidden></div>';
+    typeset(el);
+    const input=el.querySelector('.prova-input');
+    const fb=el.querySelector('.prova-fb');
+    const hintsBox=el.querySelector('.prova-hints');
+    function renderHints(){
+      hintsBox.innerHTML='';
+      for(let i=0;i<shown;i++){
+        const d=document.createElement('div');d.className='hint';
+        d.innerHTML='<strong>Suggerimento '+(i+1)+'.</strong> '+cur.hints[i];
+        hintsBox.appendChild(d);
+      }
+      typeset(hintsBox);
+    }
+    function reveal(ok){
+      done=true;input.disabled=true;fb.hidden=false;
+      fb.className='prova-fb '+(ok?'ok':'no');
+      fb.innerHTML='<strong>'+(ok?'Esatto!':'Soluzione.')+'</strong> '+cur.sol;
+      typeset(fb);
+    }
+    function check(){
+      if(done)return;
+      const raw=(input.value||'').replace(',','.').trim();
+      const v=parseFloat(raw);
+      if(raw===''||isNaN(v)){
+        fb.hidden=false;fb.className='prova-fb no';
+        fb.innerHTML='<strong>Inserisci un numero</strong> nella casella, poi premi Verifica.';
+        return;
+      }
+      if(Math.abs(v-cur.answer)<=(cur.tol||1e-6)){
+        reveal(true);
+      }else{
+        fb.hidden=false;fb.className='prova-fb no';
+        fb.innerHTML='<strong>Non ancora.</strong> Riprova, chiedi un suggerimento o mostra la soluzione.';
+      }
+    }
+    el.querySelector('.prova-ck').addEventListener('click',check);
+    el.querySelector('.prova-new').addEventListener('click',neu);
+    el.querySelector('.prova-sol').addEventListener('click',()=>{if(!done)reveal(false);});
+    el.querySelector('.prova-hint').addEventListener('click',()=>{
+      if(shown<cur.hints.length)shown++;renderHints();
+    });
+    input.addEventListener('keydown',e=>{if(e.key==='Enter')check();});
+  }
+  neu();
+}
+
+/* ================================================================
+   Dati dei quiz
+   ================================================================ */
+const QUIZZES={
+/* ---------- Aritmetica · termine generale ---------- */
+argen_q:[
+ {q:'Che cos\'è una progressione aritmetica?',
+  opts:['Una successione in cui ogni termine è il prodotto del precedente per una costante','Una successione in cui la differenza tra ogni termine e il precedente è costante','Una successione di numeri primi','Una successione in cui i termini si ripetono'],ans:1,
+  exp:'Nella progressione aritmetica la differenza $a_n-a_{n-1}=d$ è sempre la stessa; il prodotto per una costante caratterizza invece quella geometrica.'},
+ {q:'Come si chiama la costante $d$ di una progressione aritmetica?',
+  opts:['Ragione','Rapporto','Modulo','Indice'],ans:0,
+  exp:'La costante $d$ si chiama ragione della progressione aritmetica.'},
+ {q:'Qual è la formula del termine generale di una progressione aritmetica?',
+  opts:['$a_n=a_1\\cdot q^{\\,n-1}$','$a_n=a_1+n\\,d$','$a_n=a_1+(n-1)\\,d$','$a_n=a_1\\,d^{\\,n}$'],ans:2,
+  exp:'Per arrivare da $a_1$ ad $a_n$ si aggiunge la ragione $(n-1)$ volte: $a_n=a_1+(n-1)d$.'},
+ {q:'Nella progressione $5,\\,8,\\,11,\\,14,\\dots$ quanto vale la ragione $d$?',
+  opts:['3','5','2','8'],ans:0,
+  exp:'$8-5=3$, e la differenza si mantiene: $d=3$.'},
+ {q:'Data la progressione con $a_1=2$ e $d=4$, quanto vale $a_{10}$?',
+  opts:['40','38','42','36'],ans:1,
+  exp:'$a_{10}=2+(10-1)\\cdot4=2+36=38$.'},
+ {q:'In una progressione aritmetica $a_1=7$ e $a_5=23$. Qual è la ragione?',
+  opts:['5','3','4','16'],ans:2,
+  exp:'$d=\\dfrac{a_5-a_1}{5-1}=\\dfrac{23-7}{4}=4$.'},
+ {q:'Un termine (non estremo) di una progressione aritmetica è sempre:',
+  opts:['la media geometrica dei due adiacenti','la media aritmetica dei due adiacenti','la somma dei due adiacenti','il doppio del precedente'],ans:1,
+  exp:'Vale $a_n=\\dfrac{a_{n-1}+a_{n+1}}{2}$: ogni termine è la media aritmetica dei vicini.'},
+ {q:'Quale di queste successioni NON è una progressione aritmetica?',
+  opts:['$1,\\,4,\\,7,\\,10,\\dots$','$10,\\,7,\\,4,\\,1,\\dots$','$2,\\,4,\\,8,\\,16,\\dots$','$-3,\\,-1,\\,1,\\,3,\\dots$'],ans:2,
+  exp:'$2,4,8,16$ ha rapporto costante (è geometrica), non differenza costante.'},
+ {q:'Se la ragione $d$ è negativa, la progressione aritmetica è:',
+  opts:['crescente','decrescente','costante','alternata'],ans:1,
+  exp:'Con $d<0$ ogni termine è minore del precedente: la progressione decresce.'},
+ {q:'In una progressione aritmetica con $a_1=-4$ e $d=3$, qual è il primo termine positivo?',
+  opts:['$a_2=-1$','$a_3=2$','$a_4=5$','$a_1=-4$'],ans:1,
+  exp:'$a_1=-4,\\ a_2=-1,\\ a_3=2$: il primo positivo è $a_3=2$.'}
+],
+/* ---------- Aritmetica · somma ---------- */
+arsom_q:[
+ {q:'Qual è la formula della somma dei primi $n$ termini di una progressione aritmetica?',
+  opts:['$S_n=\\dfrac{n\\,(a_1+a_n)}{2}$','$S_n=n\\,(a_1+a_n)$','$S_n=\\dfrac{a_1+a_n}{2}$','$S_n=a_1\\dfrac{q^n-1}{q-1}$'],ans:0,
+  exp:'«Numero dei termini per semisomma degli estremi»: $S_n=\\dfrac{n(a_1+a_n)}{2}$.'},
+ {q:'Su quale osservazione si basa il «trucco di Gauss»?',
+  opts:['I termini equidistanti dagli estremi hanno somma costante','I termini sono tutti uguali','Il prodotto dei termini è costante','Ogni termine è il quadrato del precedente'],ans:0,
+  exp:'$a_1+a_n=a_2+a_{n-1}=\\dots$: accoppiando si ottengono somme tutte uguali.'},
+ {q:'Quanto vale $1+2+3+\\dots+100$?',
+  opts:['10000','5050','5000','1010'],ans:1,
+  exp:'$\\dfrac{100\\cdot101}{2}=5050$, il celebre risultato di Gauss.'},
+ {q:'La somma $1+2+3+\\dots+n$ è uguale a:',
+  opts:['$\\dfrac{n(n+1)}{2}$','$n^2$','$\\dfrac{n(n-1)}{2}$','$2^n-1$'],ans:0,
+  exp:'È una progressione con $a_1=1,\\ d=1$: $S_n=\\dfrac{n(n+1)}{2}$.'},
+ {q:'Calcola $S_6$ per la progressione con $a_1=3$ e $d=2$.',
+  opts:['48','36','42','30'],ans:0,
+  exp:'$a_6=3+5\\cdot2=13$; $S_6=\\dfrac{6(3+13)}{2}=\\dfrac{6\\cdot16}{2}=48$.'},
+ {q:'Quale forma della somma usa solo $a_1$, $d$ e $n$?',
+  opts:['$S_n=\\dfrac{n\\,[\\,2a_1+(n-1)d\\,]}{2}$','$S_n=\\dfrac{n(a_1+a_n)}{2}$','$S_n=n\\,a_1\\,d$','$S_n=a_1+(n-1)d$'],ans:0,
+  exp:'Sostituendo $a_n=a_1+(n-1)d$ nella formula si ottiene $S_n=\\dfrac{n[2a_1+(n-1)d]}{2}$.'},
+ {q:'La somma dei primi $n$ numeri dispari $1+3+5+\\dots$ vale:',
+  opts:['$n^2$','$\\dfrac{n(n+1)}{2}$','$2n-1$','$n(n+1)$'],ans:0,
+  exp:'È la progressione $a_1=1,\\ d=2$; si dimostra che $1+3+\\dots+(2n-1)=n^2$.'},
+ {q:'Per calcolare $S_n$ con la formula $\\dfrac{n(a_1+a_n)}{2}$ quanti dati servono?',
+  opts:['Solo $a_1$','$n$, $a_1$ e $a_n$','Solo la ragione','Tutti i termini uno per uno'],ans:1,
+  exp:'Bastano numero di termini, primo e ultimo termine; se $a_n$ manca si ricava da $a_1+(n-1)d$.'},
+ {q:'In una progressione aritmetica $a_1=4$, $a_{10}=22$. Quanto vale $S_{10}$?',
+  opts:['260','130','143','220'],ans:1,
+  exp:'$S_{10}=\\dfrac{10(4+22)}{2}=\\dfrac{10\\cdot26}{2}=130$.'},
+ {q:'Un teatro ha 12 posti in prima fila e ogni fila successiva ha 2 posti in più. Quanti posti in 8 file?',
+  opts:['152','160','184','96'],ans:0,
+  exp:'$a_1=12,\\ d=2,\\ a_8=12+7\\cdot2=26$; $S_8=\\dfrac{8(12+26)}{2}=4\\cdot38=152$.'}
+],
+/* ---------- Geometrica · termine generale ---------- */
+geogen_q:[
+ {q:'Che cos\'è una progressione geometrica?',
+  opts:['Una successione con differenza costante tra termini consecutivi','Una successione (a termini non nulli) con rapporto costante tra termini consecutivi','Una successione di quadrati perfetti','Una successione sempre crescente'],ans:1,
+  exp:'Nella progressione geometrica $\\dfrac{a_n}{a_{n-1}}=q$ è costante.'},
+ {q:'Come si chiama la costante $q$?',
+  opts:['Ragione','Differenza','Discriminante','Base'],ans:0,
+  exp:'$q$ è la ragione della progressione geometrica.'},
+ {q:'Qual è la formula del termine generale di una progressione geometrica?',
+  opts:['$a_n=a_1+(n-1)q$','$a_n=a_1\\cdot q^{\\,n}$','$a_n=a_1\\cdot q^{\\,n-1}$','$a_n=a_1\\cdot n^{\\,q}$'],ans:2,
+  exp:'Si moltiplica per $q$ esattamente $(n-1)$ volte: $a_n=a_1\\,q^{\\,n-1}$.'},
+ {q:'Nella progressione $3,\\,6,\\,12,\\,24,\\dots$ quanto vale la ragione $q$?',
+  opts:['3','2','6','4'],ans:1,
+  exp:'$6:3=2$, e il rapporto si mantiene: $q=2$.'},
+ {q:'Data la progressione con $a_1=2$ e $q=3$, quanto vale $a_4$?',
+  opts:['54','24','18','162'],ans:0,
+  exp:'$a_4=2\\cdot3^{\\,3}=2\\cdot27=54$.'},
+ {q:'Con $a_1>0$ e $0<q<1$ la progressione geometrica:',
+  opts:['cresce senza limite','decresce avvicinandosi a zero','è costante','ha termini di segno alternato'],ans:1,
+  exp:'Moltiplicare per un numero tra 0 e 1 rimpicciolisce i termini, che tendono a zero.'},
+ {q:'Se la ragione $q$ è negativa, i termini (con $a_1\\neq0$):',
+  opts:['sono tutti positivi','sono tutti negativi','hanno segno alternato','sono tutti nulli'],ans:2,
+  exp:'Moltiplicando per un numero negativo il segno cambia a ogni passo: $+,-,+,-,\\dots$'},
+ {q:'Quale di queste successioni è una progressione geometrica?',
+  opts:['$2,\\,5,\\,8,\\,11,\\dots$','$1,\\,2,\\,6,\\,24,\\dots$','$5,\\,10,\\,20,\\,40,\\dots$','$1,\\,1,\\,2,\\,3,\\,5,\\dots$'],ans:2,
+  exp:'$5,10,20,40$ ha rapporto costante 2. La seconda ($1,2,6,24$) ha rapporti $2,3,4$: non è geometrica.'},
+ {q:'Un termine di una progressione geometrica (positiva) è il ____ dei due adiacenti.',
+  opts:['medio aritmetico','medio geometrico','massimo','prodotto'],ans:1,
+  exp:'Vale $a_n=\\sqrt{a_{n-1}\\,a_{n+1}}$: è la media geometrica dei vicini.'},
+ {q:'Una coltura batterica raddoppia ogni ora. Partendo da 500 batteri, quanti dopo 3 ore?',
+  opts:['1500','3000','4000','2000'],ans:2,
+  exp:'$a_1=500,\\ q=2$; dopo 3 ore è il 4º termine: $500\\cdot2^{\\,3}=500\\cdot8=4000$.'}
+],
+/* ---------- Geometrica · somma ---------- */
+geosom_q:[
+ {q:'Qual è la formula della somma dei primi $n$ termini di una progressione geometrica (con $q\\neq1$)?',
+  opts:['$S_n=a_1\\dfrac{q^{\\,n}-1}{q-1}$','$S_n=\\dfrac{n(a_1+a_n)}{2}$','$S_n=a_1\\,q^{\\,n-1}$','$S_n=\\dfrac{a_1}{1-q}$'],ans:0,
+  exp:'$S_n=a_1\\dfrac{q^{\\,n}-1}{q-1}$, ottenuta moltiplicando $S_n$ per $q$ e sottraendo.'},
+ {q:'Se la ragione vale $q=1$, quanto vale $S_n$?',
+  opts:['$0$','$n\\,a_1$','$a_1\\dfrac{q^n-1}{q-1}$','non esiste'],ans:1,
+  exp:'Con $q=1$ tutti i termini valgono $a_1$, quindi $S_n=n\\,a_1$ (la formula generale darebbe $0/0$).'},
+ {q:'Calcola la somma dei primi 4 termini di $2,\\,6,\\,18,\\,54,\\dots$',
+  opts:['80','78','108','60'],ans:0,
+  exp:'$2+6+18+54=80$, oppure $S_4=2\\dfrac{3^4-1}{3-1}=2\\cdot40=80$.'},
+ {q:'Quanto vale $1+2+4+8+\\dots+2^{\\,9}$ (dieci termini)?',
+  opts:['512','1024','1023','511'],ans:2,
+  exp:'$S_{10}=1\\cdot\\dfrac{2^{10}-1}{2-1}=1024-1=1023$.'},
+ {q:'A quale condizione la serie geometrica infinita $a_1+a_1q+a_1q^2+\\dots$ converge?',
+  opts:['$q>1$','$|q|<1$','$q=1$','$q$ intero'],ans:1,
+  exp:'Solo se $|q|<1$ il termine $q^n$ tende a zero e la somma infinita è finita.'},
+ {q:'Quanto vale la somma infinita $1+\\dfrac12+\\dfrac14+\\dfrac18+\\dots$?',
+  opts:['$1$','$\\infty$','$2$','$\\dfrac32$'],ans:2,
+  exp:'$S=\\dfrac{a_1}{1-q}=\\dfrac{1}{1-\\frac12}=2$.'},
+ {q:'La somma infinita di una progressione geometrica con $|q|<1$ vale:',
+  opts:['$\\dfrac{a_1}{1-q}$','$\\dfrac{a_1}{q-1}$','$a_1\\,q$','$\\dfrac{1-q}{a_1}$'],ans:0,
+  exp:'Facendo tendere $n$ all\'infinito con $|q|<1$: $S=\\dfrac{a_1}{1-q}$.'},
+ {q:'Nella leggenda degli scacchi, il numero totale di chicchi su 64 caselle (partendo da 1 e raddoppiando) è:',
+  opts:['$2^{64}$','$2^{64}-1$','$64^2$','$2\\cdot64$'],ans:1,
+  exp:'$1+2+4+\\dots+2^{63}=2^{64}-1$, un numero enorme (circa $1,8\\cdot10^{19}$).'},
+ {q:'Calcola $S_5$ per la progressione con $a_1=1$ e $q=3$.',
+  opts:['121','243','120','81'],ans:0,
+  exp:'$S_5=1\\cdot\\dfrac{3^5-1}{3-1}=\\dfrac{243-1}{2}=121$.'},
+ {q:'Perché la serie di Zenone (Achille e la tartaruga) ha somma finita?',
+  opts:['Perché i tratti da percorrere sono finiti in numero','Perché formano una progressione geometrica con $|q|<1$','Perché Achille è più veloce','Perché la tartaruga si ferma'],ans:1,
+  exp:'I tratti formano una progressione geometrica di ragione minore di 1: infiniti addendi, somma finita.'}
+],
+/* ---------- Riepilogo (20) ---------- */
+rip_q:[
+ {q:'In una progressione aritmetica è costante la…',
+  opts:['differenza tra termini consecutivi','rapporto tra termini consecutivi','somma di tutti i termini','radice dei termini'],ans:0,
+  exp:'Aritmetica = differenza costante $d$; geometrica = rapporto costante $q$.'},
+ {q:'In una progressione geometrica è costante il…',
+  opts:['la differenza tra termini consecutivi','il rapporto tra termini consecutivi','il primo termine soltanto','numero dei termini'],ans:1,
+  exp:'Geometrica = rapporto costante $q=\\dfrac{a_n}{a_{n-1}}$.'},
+ {q:'Il termine generale di una progressione aritmetica è:',
+  opts:['$a_1\\,q^{\\,n-1}$','$a_1+(n-1)d$','$\\dfrac{n(a_1+a_n)}{2}$','$a_1\\,d^{\\,n}$'],ans:1,
+  exp:'$a_n=a_1+(n-1)d$.'},
+ {q:'Il termine generale di una progressione geometrica è:',
+  opts:['$a_1+(n-1)q$','$a_1\\,q^{\\,n}$','$a_1\\,q^{\\,n-1}$','$a_1\\,n^{\\,q}$'],ans:2,
+  exp:'$a_n=a_1\\,q^{\\,n-1}$.'},
+ {q:'Nella successione $2,\\,4,\\,8,\\,16,\\dots$ si tratta di una progressione:',
+  opts:['aritmetica di ragione 2','geometrica di ragione 2','aritmetica di ragione 4','né aritmetica né geometrica'],ans:1,
+  exp:'Ogni termine è il doppio del precedente: geometrica con $q=2$.'},
+ {q:'Nella successione $2,\\,5,\\,8,\\,11,\\dots$ si tratta di una progressione:',
+  opts:['aritmetica di ragione 3','geometrica di ragione 3','aritmetica di ragione 2','geometrica di ragione 2'],ans:0,
+  exp:'Differenza costante $3$: aritmetica con $d=3$.'},
+ {q:'Data $a_1=5$, $d=3$, quanto vale $a_8$?',
+  opts:['24','26','29','21'],ans:1,
+  exp:'$a_8=5+7\\cdot3=5+21=26$.'},
+ {q:'Data $a_1=1$, $q=2$, quanto vale $a_8$?',
+  opts:['128','256','64','16'],ans:0,
+  exp:'$a_8=1\\cdot2^{\\,7}=128$.'},
+ {q:'Quanto vale $1+2+3+\\dots+50$?',
+  opts:['1275','2500','1250','2550'],ans:0,
+  exp:'$\\dfrac{50\\cdot51}{2}=1275$.'},
+ {q:'Quanto vale $S_4$ della progressione geometrica $1,\\,3,\\,9,\\,27$?',
+  opts:['40','27','30','81'],ans:0,
+  exp:'$1+3+9+27=40$ (oppure $\\dfrac{3^4-1}{3-1}=40$).'},
+ {q:'La somma dei primi $n$ termini di una progressione aritmetica è:',
+  opts:['$\\dfrac{n(a_1+a_n)}{2}$','$a_1\\dfrac{q^n-1}{q-1}$','$n\\,a_1\\,d$','$\\dfrac{a_1}{1-q}$'],ans:0,
+  exp:'$S_n=\\dfrac{n(a_1+a_n)}{2}$.'},
+ {q:'La somma dei primi $n$ termini di una progressione geometrica ($q\\neq1$) è:',
+  opts:['$\\dfrac{n(a_1+a_n)}{2}$','$a_1\\dfrac{q^{\\,n}-1}{q-1}$','$a_1+(n-1)d$','$n\\,a_1$'],ans:1,
+  exp:'$S_n=a_1\\dfrac{q^{\\,n}-1}{q-1}$.'},
+ {q:'La serie geometrica infinita converge se e solo se:',
+  opts:['$q>0$','$|q|<1$','$q$ è intero','$a_1>0$'],ans:1,
+  exp:'Serve $|q|<1$ affinché $q^n\\to0$.'},
+ {q:'Quanto vale $1+\\dfrac13+\\dfrac19+\\dfrac1{27}+\\dots$ (infiniti termini)?',
+  opts:['$\\dfrac32$','$2$','$\\dfrac43$','$3$'],ans:0,
+  exp:'$S=\\dfrac{1}{1-\\frac13}=\\dfrac{1}{\\frac23}=\\dfrac32$.'},
+ {q:'In una progressione geometrica con $q<0$ i termini hanno:',
+  opts:['tutti lo stesso segno','segno alternato','sempre valore crescente','valore costante'],ans:1,
+  exp:'Moltiplicare per un negativo alterna i segni.'},
+ {q:'Un termine interno di una progressione aritmetica è la media ____ dei vicini; di una geometrica la media ____.',
+  opts:['geometrica / aritmetica','aritmetica / geometrica','armonica / aritmetica','aritmetica / armonica'],ans:1,
+  exp:'Aritmetica → media aritmetica; geometrica → media geometrica dei due adiacenti.'},
+ {q:'La successione di Fibonacci $1,\\,1,\\,2,\\,3,\\,5,\\,8,\\dots$ è:',
+  opts:['una progressione aritmetica','una progressione geometrica','né aritmetica né geometrica','una progressione di ragione 1'],ans:2,
+  exp:'Non ha differenza né rapporto costanti: non è una progressione in senso stretto.'},
+ {q:'In una progressione aritmetica $a_3=10$ e $a_7=22$. Quanto vale la ragione $d$?',
+  opts:['3','4','2','6'],ans:0,
+  exp:'$d=\\dfrac{a_7-a_3}{7-3}=\\dfrac{22-10}{4}=3$.'},
+ {q:'Risparmi: metti 2 € il 1º giorno e ogni giorno 2 € in più del precedente. Quanto avrai dopo 10 giorni?',
+  opts:['110 €','90 €','100 €','120 €'],ans:0,
+  exp:'$a_1=2,\\ d=2,\\ a_{10}=20$; $S_{10}=\\dfrac{10(2+20)}{2}=110$ €.'},
+ {q:'Un foglio si piega in due ripetutamente: lo spessore raddoppia ogni piega. Dopo quante pieghe lo spessore è 2^{10} volte quello iniziale?',
+  opts:['10','20','1024','9'],ans:0,
+  exp:'Lo spessore è una progressione geometrica di ragione 2: dopo 10 pieghe è $2^{10}$ volte l\'iniziale.'}
+]
+};
+
+/* ================================================================
+   Motore quiz (una domanda per volta, con back e ripasso errori)
+   ================================================================ */
+function shuffled(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){const j=ri(i+1);const t=a[i];a[i]=a[j];a[j]=t}
+  return a;
+}
+function initQuiz(el){
+  const data=QUIZZES[el.dataset.quiz];
+  if(!data){el.innerHTML='<p>Quiz non disponibile.</p>';return;}
+  let i=0,score=0;
+  const history=data.map(()=>null);
+  const orders=data.map(()=>null);
+  function ensureOrder(idx){
+    if(!orders[idx])orders[idx]=shuffled(data[idx].opts.map((t,ix)=>({t,ix})));
+  }
+  function qHTML(){
+    ensureOrder(i);
+    const q=data[i],order=orders[i],hist=history[i],isAns=hist!==null;
+    el.innerHTML=
+      '<div class="quiz-hd"><span>Domanda '+(i+1)+' di '+data.length+'</span>'+
+      '<span class="score">Punteggio: '+score+'</span></div>'+
+      '<div class="quiz-bar"><i style="width:'+((isAns?i+1:i)/data.length*100)+'%"></i></div>'+
+      '<p class="quiz-q">'+q.q+'</p>'+
+      '<div class="quiz-opts">'+order.map((o,k)=>{
+        let cls='quiz-btn';
+        if(isAns){
+          if(order[k].ix===q.ans)cls+=' correct';
+          else if(k===hist.chosen)cls+=' wrong';
+        }
+        return'<button class="'+cls+'" data-k="'+k+'"'+(isAns?' disabled':'')+'>'+o.t+'</button>';
+      }).join('')+'</div>'+
+      '<div class="quiz-ft">'+(isAns?'<div class="quiz-exp '+(hist.right?'ok':'no')+'"><strong>'+(hist.right?'Esatto. ':'Non è corretto. ')+'</strong>'+q.exp+'</div>':'')+'</div>'+
+      '<div class="quiz-nav"><button class="btn-back"'+(i===0?' disabled':'')+'>← Indietro</button>'+
+        (!isAns?'':'<button class="btn btn-primary quiz-next">'+(i<data.length-1?'Avanti →':'Vedi il risultato')+'</button>')+
+      '</div>';
+    if(!isAns){
+      el.querySelectorAll('.quiz-btn').forEach(b=>b.addEventListener('click',()=>answer(+b.dataset.k)));
+    }else{
+      const nxt=el.querySelector('.quiz-next');
+      if(nxt)nxt.addEventListener('click',()=>{i++;if(i<data.length)qHTML();else end();});
+    }
+    el.querySelector('.btn-back').addEventListener('click',()=>{if(i>0){i--;qHTML();}});
+    typeset(el);
+  }
+  function answer(k){
+    ensureOrder(i);
+    const q=data[i],order=orders[i];
+    const right=order[k].ix===q.ans;
+    if(right)score++;
+    history[i]={chosen:k,right};
+    el.querySelectorAll('.quiz-btn').forEach((b,j)=>{
+      b.disabled=true;
+      if(order[j].ix===q.ans)b.classList.add('correct');
+      else if(j===k)b.classList.add('wrong');
+    });
+    el.querySelector('.quiz-hd .score').textContent='Punteggio: '+score;
+    el.querySelector('.quiz-bar i').style.width=((i+1)/data.length*100)+'%';
+    const ft=el.querySelector('.quiz-ft');
+    ft.innerHTML='<div class="quiz-exp '+(right?'ok':'no')+'"><strong>'+(right?'Esatto. ':'Non è corretto. ')+'</strong>'+q.exp+'</div>';
+    typeset(ft);
+    const nav=el.querySelector('.quiz-nav');
+    const nextBtn=document.createElement('button');
+    nextBtn.className='btn btn-primary quiz-next';
+    nextBtn.textContent=i<data.length-1?'Avanti →':'Vedi il risultato';
+    nextBtn.addEventListener('click',()=>{i++;if(i<data.length)qHTML();else end();});
+    nav.appendChild(nextBtn);
+    const back=nav.querySelector('.btn-back');if(back)back.disabled=(i===0);
+  }
+  function end(){
+    const errors=history.map((h,idx)=>h&&!h.right?{q:data[idx].q,exp:data[idx].exp}:null).filter(Boolean);
+    const frac=score/data.length;
+    const msg=frac>=0.9?'Eccellente: padroneggi l\'argomento.':
+      frac>=0.7?'Molto bene: ancora un piccolo sforzo per la perfezione.':
+      frac>=0.5?'Sufficiente: rivedi le spiegazioni degli errori e riprova.':
+      'Riparti dalla teoria e dalla simulazione, poi riprova il quiz.';
+    let errHtml='';
+    if(errors.length){
+      errHtml='<div class="quiz-errors"><p class="quiz-err-hd">Argomenti da rivedere:</p>'+
+        errors.map(e=>'<div class="err-item"><div class="err-q">'+e.q+'</div><div class="err-exp">'+e.exp+'</div></div>').join('')+
+        '<button class="quiz-teoria-link">← Vai alla Teoria</button></div>';
+    }
+    el.innerHTML='<div class="quiz-end"><div class="big">'+score+' / '+data.length+'</div><p>'+msg+'</p>'+errHtml+
+      '<button class="btn btn-primary" style="margin-top:.7rem">Ricomincia</button></div>';
+    el.querySelector('.btn.btn-primary').addEventListener('click',()=>{history.fill(null);orders.fill(null);i=0;score=0;qHTML();});
+    const link=el.querySelector('.quiz-teoria-link');
+    if(link)link.addEventListener('click',()=>{
+      const sec=el.closest('section');if(!sec)return;
+      const tt=sec.querySelector('[data-sectab="teoria"]');if(tt)tt.click();else show('argen');
+    });
+    typeset(el);
+  }
+  qHTML();
+}
+
+/* ================================================================
+   Tema scuro / chiaro
+   ================================================================ */
+(function(){
+  const btn=document.getElementById('themeToggle');
+  const meta=document.querySelector('meta[name="theme-color"]');
+  function apply(dark){
+    document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+    btn.setAttribute('aria-label',dark?'Attiva tema chiaro':'Attiva tema scuro');
+    if(meta)meta.setAttribute('content',dark?'#111827':'#f9fafb');
+  }
+  const stored=localStorage.getItem('theme');
+  apply(stored==='dark'||(stored===null&&matchMedia('(prefers-color-scheme:dark)').matches));
+  btn.addEventListener('click',()=>{
+    const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+    apply(!isDark);localStorage.setItem('theme',isDark?'light':'dark');
+  });
+})();
+
+/* ================================================================
+   Avvio
+   ================================================================ */
+document.addEventListener('DOMContentLoaded',function(){
+  typeset(document.body);
+  $$('.pratica[data-gen]').forEach(el=>{try{initPratica(el,PRATICA[el.dataset.gen])}catch(e){console.error('pratica',e)}});
+  $$('.quiz[data-quiz]').forEach(el=>{try{initQuiz(el)}catch(e){console.error('quiz',el.dataset.quiz,e)}});
+  const initId=location.hash.slice(1);
+  show(document.getElementById(initId)?initId:'home');
+});
+</script>
+</body>
+</html>
